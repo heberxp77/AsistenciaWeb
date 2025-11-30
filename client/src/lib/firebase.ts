@@ -4,12 +4,21 @@ import { getFirestore, collection, doc, getDoc, getDocs, setDoc, updateDoc, dele
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
 const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-  authDomain: `${import.meta.env.VITE_FIREBASE_PROJECT_ID}.firebaseapp.com`,
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-  storageBucket: `${import.meta.env.VITE_FIREBASE_PROJECT_ID}.firebasestorage.app`,
-  appId: import.meta.env.VITE_FIREBASE_APP_ID,
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || "",
+  authDomain: `${import.meta.env.VITE_FIREBASE_PROJECT_ID || ""}.firebaseapp.com`,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || "",
+  storageBucket: `${import.meta.env.VITE_FIREBASE_PROJECT_ID || ""}.firebasestorage.app`,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID || "",
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || "",
 };
+
+// Validate Firebase configuration
+if (!firebaseConfig.apiKey || !firebaseConfig.projectId || !firebaseConfig.appId) {
+  console.error("Firebase configuration incomplete. Check environment variables:");
+  console.error("- VITE_FIREBASE_API_KEY:", !!firebaseConfig.apiKey);
+  console.error("- VITE_FIREBASE_PROJECT_ID:", !!firebaseConfig.projectId);
+  console.error("- VITE_FIREBASE_APP_ID:", !!firebaseConfig.appId);
+}
 
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
@@ -17,6 +26,9 @@ export const db = getFirestore(app);
 export const storage = getStorage(app);
 
 const googleProvider = new GoogleAuthProvider();
+googleProvider.setCustomParameters({
+  prompt: "select_account",
+});
 
 export const signInWithGoogle = () => {
   return signInWithRedirect(auth, googleProvider);
